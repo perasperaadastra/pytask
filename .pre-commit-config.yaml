@@ -25,10 +25,10 @@ repos:
     -   id: python-no-log-warn
     -   id: text-unicode-replacement-char
 -   repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.9.9
+    rev: v0.11.3
     hooks:
-      - id: ruff-format
-      - id: ruff
+    -   id: ruff-format
+    -   id: ruff
 -   repo: https://github.com/dosisod/refurb
     rev: v2.0.0
     hooks:
@@ -37,21 +37,13 @@ repos:
     rev: 0.7.22
     hooks:
     -   id: mdformat
-        additional_dependencies: [
-            mdformat-gfm,
-            mdformat-ruff,
-            mdformat-pyproject>=0.0.2,
-        ]
+        additional_dependencies: [mdformat-gfm, mdformat-ruff, mdformat-pyproject>=0.0.2]
         files: (README\.md)
 -   repo: https://github.com/executablebooks/mdformat
     rev: 0.7.22
     hooks:
     -   id: mdformat
-        additional_dependencies: [
-            mdformat-myst,
-            mdformat-ruff,
-            mdformat-pyproject>=0.0.2,
-        ]
+        additional_dependencies: [mdformat-myst, mdformat-ruff, mdformat-pyproject>=0.0.2]
         files: (docs/.)
 -   repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
@@ -59,7 +51,7 @@ repos:
     -   id: nbstripout
         exclude: (docs)
 -   repo: https://github.com/crate-ci/typos
-    rev: v1.30.0
+    rev: v1.31.1
     hooks:
     -   id: typos
         exclude: (\.ipynb)
