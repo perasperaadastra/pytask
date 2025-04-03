@@ -17,6 +17,7 @@ from attrs import define
 from attrs import field
 
 from _pytask.config_utils import find_project_root_and_config
+from _pytask.config_utils import read_config
 from _pytask.data_catalog_utils import DATA_CATALOG_NAME_FIELD
 from _pytask.exceptions import NodeNotCollectedError
 from _pytask.models import NodeInfo
@@ -27,6 +28,7 @@ from _pytask.node_protocols import warn_about_upcoming_attributes_field_on_nodes
 from _pytask.nodes import PickleNode
 from _pytask.pluginmanager import storage
 from _pytask.session import Session
+from _pytask.shared import to_list
 
 __all__ = ["DataCatalog"]
 
@@ -83,11 +85,44 @@ class DataCatalog:
             raise ValueError(msg)
 
     def __attrs_post_init__(self) -> None:
-        root_path, _ = find_project_root_and_config((self._instance_path,))
+        root_path, config_path = find_project_root_and_config((self._instance_path,))
         self._session_config["paths"] = (root_path,)
 
         if not self.path:
-            self.path = root_path / ".pytask" / "data_catalogs" / self.name
+            if "cache_dir" not in self._session_config:
+                assert "config" not in self._session_config
+
+                self._session_config["config"] = config_path
+                if isinstance(config_path, Path):
+                    # data catalog was used without command but with config
+                    config_from_file = read_config(self._session_config["config"])
+
+                    if "paths" in config_from_file:
+                        paths = config_from_file["paths"]
+                        paths = [
+                            self._session_config["config"]
+                            .parent.joinpath(path)
+                            .resolve()
+                            for path in to_list(paths)
+                        ]
+                        config_from_file["paths"] = paths
+
+                    self._session_config = {**self._session_config, **config_from_file}
+
+            if not hasattr(self._session_config, "cache_dir"):
+                # data catalog was used without command and without config
+                from _pytask.cli import DEFAULTS_FROM_CLI
+
+                self._session_config["cache_dir"] = DEFAULTS_FROM_CLI["cache_dir"]
+            if not isinstance(self._session_config["cache_dir"], Path):
+                self._session_config["cache_dir"] = Path(
+                    self._session_config["cache_dir"]
+                )
+            if not self._session_config["cache_dir"].is_absolute():
+                self._session_config["cache_dir"] = (
+                    root_path / self._session_config["cache_dir"]
+                )
+            self.path = self._session_config["cache_dir"] / "data_catalogs" / self.name
 
         self.path.mkdir(parents=True, exist_ok=True)
 

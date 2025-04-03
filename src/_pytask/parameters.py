@@ -84,6 +84,21 @@ _EDITOR_URL_SCHEME_OPTION = click.Option(
 )
 """click.Option: An option to embed URLs in task ids."""
 
+_CACHE_DIR_OPTION = click.Option(
+    ["--cache-dir"],
+    type=click.Path(
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        allow_dash=True,
+        path_type=Path,
+        resolve_path=False,
+    ),
+    help="Path to cache dir.",
+    default=".pytask/",
+)
+"""click.Option: An option to change cache directory."""
+
 
 def _database_url_callback(
     ctx: Context,  # noqa: ARG001
@@ -183,7 +198,12 @@ _HOOK_MODULE_OPTION = click.Option(
 def pytask_extend_command_line_interface(cli: click.Group) -> None:
     """Register general markers."""
     for command in ("build", "clean", "collect", "dag", "profile"):
-        cli.commands[command].params.extend((_DATABASE_URL_OPTION,))
+        cli.commands[command].params.extend(
+            (
+                _CACHE_DIR_OPTION,
+                _DATABASE_URL_OPTION,
+            )
+        )
     for command in ("build", "clean", "collect", "dag", "markers", "profile"):
         cli.commands[command].params.extend(
             (_CONFIG_OPTION, _HOOK_MODULE_OPTION, _PATH_ARGUMENT)
