@@ -192,8 +192,11 @@ class LiveExecution:
         return True
 
     @hookimpl
-    def pytask_execute_task_log_end(self, report: ExecutionReport) -> bool:
+    def pytask_execute_task_log_end(
+        self, session: Session, report: ExecutionReport
+    ) -> bool:
         """Mark a task as being finished and update outcome."""
+        self.n_tasks = len(session.tasks)
         self.update_report(report)
         return True
 
