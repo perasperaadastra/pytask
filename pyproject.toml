@@ -86,7 +86,11 @@ Tracker = "https://github.com/pytask-dev/pytask/issues"
 pytask = "pytask:cli"
 
 [tool.uv]
-dev-dependencies = ["tox-uv>=1.7.0", "pygraphviz;platform_system=='Linux'"]
+dev-dependencies = [
+    "tox-uv>=1.7.0",
+    "pygraphviz;platform_system=='Linux'",
+    "pre-commit>=4.2.0",
+]
 
 [build-system]
 requires = ["hatchling", "hatch_vcs"]

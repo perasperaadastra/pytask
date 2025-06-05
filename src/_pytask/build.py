@@ -51,7 +51,7 @@ def pytask_extend_command_line_interface(cli: click.Group) -> None:
 def pytask_post_parse(config: dict[str, Any]) -> None:
     """Fill cache of file hashes with stored hashes."""
     with suppress(Exception):
-        path = config["root"] / ".pytask" / "file_hashes.json"
+        path = config["cache_dir"] / "file_hashes.json"
         cache = json.loads(path.read_text())
 
         for key, value in cache.items():
@@ -61,12 +61,13 @@ def pytask_post_parse(config: dict[str, Any]) -> None:
 @hookimpl
 def pytask_unconfigure(session: Session) -> None:
     """Save calculated file hashes to file."""
-    path = session.config["root"] / ".pytask" / "file_hashes.json"
+    path = session.config["cache_dir"] / "file_hashes.json"
     path.write_text(json.dumps(HashPathCache._cache))
 
 
 def build(  # noqa: C901, PLR0912, PLR0913
     *,
+    cache_dir: Path | None = None,
     capture: Literal["fd", "no", "sys", "tee-sys"] | CaptureMethod = CaptureMethod.FD,
     check_casing_of_paths: bool = True,
     config: Path | None = None,
@@ -108,6 +109,9 @@ def build(  # noqa: C901, PLR0912, PLR0913
 
     Parameters
     ----------
+    cache_dir
+        A directory for file_hashes file and (default) sqlite database file. The
+        location of the latter can be overwritten by a different parameters.
     capture
         The capture method for stdout and stderr.
     check_casing_of_paths
@@ -181,6 +185,7 @@ def build(  # noqa: C901, PLR0912, PLR0913
     """
     try:
         raw_config = {
+            "cache_dir": cache_dir,
             "capture": capture,
             "check_casing_of_paths": check_casing_of_paths,
             "config": config,

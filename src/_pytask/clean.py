@@ -68,7 +68,7 @@ def pytask_parse_config(config: dict[str, Any]) -> None:
         to_list(config["exclude"])
         + _DEFAULT_EXCLUDE
         # Adding the cache folder to the exclude list.
-        + [config["root"].joinpath(".pytask", "*").as_posix()]
+        + [config["cache_dir"].joinpath("*").as_posix()]
     )
 
 
