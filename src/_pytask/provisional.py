@@ -78,7 +78,7 @@ def pytask_execute_task(session: Session, task: PTask) -> None:
             tasks = COLLECTED_TASKS.pop(None)
             name_to_function = parse_collected_tasks_with_task_marker(tasks)
         else:
-            msg = "The task generator {task.name!r} did not create any tasks."
+            msg = f"The task generator {task.name!r} did not create any tasks."
             raise RuntimeError(msg)
 
         new_reports = []
