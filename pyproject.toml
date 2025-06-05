@@ -90,7 +90,6 @@ dev-dependencies = [
     "tox-uv>=1.7.0",
     "pygraphviz;platform_system=='Linux'",
     "pre-commit>=4.2.0",
-    "setuptools>=78.1.0", # https://github.com/conda/conda/issues/11931#issuecomment-1269544421
 ]
 
 [build-system]
