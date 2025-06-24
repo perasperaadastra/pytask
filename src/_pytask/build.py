@@ -280,7 +280,7 @@ def build(  # noqa: C901, PLR0912, PLR0913
             session.exit_code = ExitCode.FAILED
 
         except Exception:  # noqa: BLE001
-            console.print(Traceback(sys.exc_info()))
+            console.print(Traceback(sys.exc_info(), show_locals=True))
             session.exit_code = ExitCode.FAILED
 
         session.hook.pytask_unconfigure(session=session)
@@ -330,12 +330,7 @@ def build(  # noqa: C901, PLR0912, PLR0913
     help="Execute a task even if it succeeded successfully before.",
 )
 def build_command(**raw_config: Any) -> NoReturn:
-    """Collect tasks, execute them and report the results.
-
-    The default command. pytask collects tasks from the given paths or the
-    current working directory, executes them and reports the results.
-
-    """
+    """Collect tasks, execute them and report the results."""
     raw_config["command"] = "build"
     session = build(**raw_config)
     sys.exit(session.exit_code)
