@@ -12,6 +12,7 @@ from pytask import ExecutionReport
 from pytask import ExitCode
 from pytask import Task
 from pytask import TaskOutcome
+from pytask import build
 from pytask import cli
 
 
@@ -302,3 +303,29 @@ def test_sort_table_option(tmp_path, runner, sort_table):
     task_names = [name[0][-1] for name in task_names if name]
     expected = ["a", "b"] if sort_table == "true" else ["b", "a"]
     assert expected == task_names
+
+
+def test_live_execution_counts_tasks_generated_during_execution(tmp_path):
+    """Tasks created while executing count towards the completion total."""
+    source = """
+    from pathlib import Path
+    from typing import Annotated
+    from pytask import task
+
+    @task(is_generator=True)
+    def task_generator():
+        for i in range(2):
+            output = Path(f"out-{i}.txt")
+
+            @task
+            def task_example() -> Annotated[str, output]:
+                return "generated"
+    """
+    tmp_path.joinpath("task_module.py").write_text(textwrap.dedent(source))
+
+    session = build(paths=tmp_path)
+
+    assert session.exit_code == ExitCode.OK
+    assert len(session.tasks) == 3
+    live_execution = session.config["pm"].get_plugin("live_execution")
+    assert live_execution.n_tasks == len(session.tasks)
