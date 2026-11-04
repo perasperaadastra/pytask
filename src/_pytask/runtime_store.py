@@ -83,8 +83,8 @@ class RuntimeState:
         self._rebuild_index()
 
     @classmethod
-    def from_root(cls, root: Path) -> RuntimeState:
-        path = root / ".pytask" / "runtimes.json"
+    def from_cache_dir(cls, cache_dir: Path) -> RuntimeState:
+        path = cache_dir / "runtimes.json"
         journal = JsonlJournal(
             path=path.with_suffix(".journal"), type_=_RuntimeJournalEntry
         )
@@ -103,6 +103,16 @@ class RuntimeState:
         if journal_entries:
             state._dirty = True
         return state
+
+    @classmethod
+    def from_root(cls, root: Path) -> RuntimeState:
+        """Create the state for a project whose cache lives in ``.pytask``.
+
+        Only kept so code and tests written against the default layout keep working;
+        new callers should use :meth:`from_cache_dir`.
+
+        """
+        return cls.from_cache_dir(root / ".pytask")
 
     def _rebuild_index(self) -> None:
         self._index = {entry.id: entry for entry in self.runtimes.task}

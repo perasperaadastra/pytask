@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 from typing import Any
 
+from _pytask.config_utils import normalize_cache_dir
 from _pytask.console import console
 from _pytask.pluginmanager import hookimpl
 from _pytask.shared import parse_markers
@@ -74,6 +75,9 @@ def pytask_configure(pm: PluginManager, raw_config: dict[str, Any]) -> dict[str,
     config = {"pm": pm, "markers": {}} | raw_config
     config["markers"] = parse_markers(markers)
 
+    # Resolve the cache directory before the parse hooks read it.
+    config["cache_dir"] = normalize_cache_dir(config.get("cache_dir"), config["root"])
+
     with catch_configured_warnings(config, record=False):
         pm.hook.pytask_parse_config(config=config)
 
@@ -88,11 +92,11 @@ def pytask_configure(pm: PluginManager, raw_config: dict[str, Any]) -> dict[str,
 @hookimpl
 def pytask_parse_config(config: dict[str, Any]) -> None:
     """Parse the configuration."""
-    config["root"].joinpath(".pytask").mkdir(exist_ok=True, parents=True)
+    config["cache_dir"].mkdir(exist_ok=True, parents=True)
 
-    # Ensure a .gitignore file exists in the .pytask directory to avoid accidentally
+    # Ensure a .gitignore file exists in the cache directory to avoid accidentally
     # committing the cache.
-    gitignore_path = config["root"].joinpath(".pytask", ".gitignore")
+    gitignore_path = config["cache_dir"].joinpath(".gitignore")
     if not gitignore_path.exists():
         gitignore_path.write_text("# Automatically added by pytask.\n*\n")
 

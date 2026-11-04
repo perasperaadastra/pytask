@@ -19,11 +19,16 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
 __all__ = [
+    "CACHE_DIR_DEFAULT",
     "find_project_root_and_config",
+    "normalize_cache_dir",
     "normalize_programmatic_config",
     "read_config",
     "set_defaults_from_config",
 ]
+
+CACHE_DIR_DEFAULT = ".pytask/"
+"""str: The default of the ``--cache-dir`` command-line option."""
 
 
 def set_defaults_from_config(
@@ -150,6 +155,21 @@ def _is_click_sentinel(value: Any) -> bool:
         and value.__class__.__name__ == "Sentinel"
         and value.__class__.__module__ == "click._utils"
     )
+
+
+def normalize_cache_dir(cache_dir: Any, root: Any) -> Path:
+    """Resolve the cache directory against the project root.
+
+    Both arguments come out of untyped configuration dictionaries and are only
+    validated here: an empty value falls back to the default of the ``--cache-dir``
+    command-line option so that programmatic and command-line usage agree.
+
+    """
+    if not cache_dir:
+        cache_dir = CACHE_DIR_DEFAULT
+
+    cache_dir = Path(cache_dir)
+    return cache_dir if cache_dir.is_absolute() else Path(root) / cache_dir
 
 
 def find_project_root_and_config(

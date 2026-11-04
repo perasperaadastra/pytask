@@ -18,6 +18,8 @@ from typing import Protocol
 from typing import cast
 
 from _pytask.config_utils import find_project_root_and_config
+from _pytask.config_utils import normalize_cache_dir
+from _pytask.config_utils import read_config
 from _pytask.data_catalog_utils import DATA_CATALOG_NAME_FIELD
 from _pytask.exceptions import NodeNotCollectedError
 from _pytask.models import NodeInfo
@@ -84,7 +86,7 @@ class DataCatalog:
         store data in different locations.
     path
         A path where automatically created files are stored. By default, it will be
-        ``.pytask/data_catalogs/default``.
+        ``<cache_dir>/data_catalogs/default``.
 
     """
 
@@ -113,11 +115,19 @@ class DataCatalog:
             raise ValueError(msg)
 
         # Initialize paths and load persisted nodes
-        root_path, _ = find_project_root_and_config((self._instance_path,))
+        root_path, config_path = find_project_root_and_config((self._instance_path,))
         self._session_config["paths"] = (root_path,)
 
         if not self.path:
-            self.path = root_path / ".pytask" / "data_catalogs" / self.name
+            cache_dir = self._session_config.get("cache_dir")
+            if cache_dir is None and isinstance(config_path, Path):
+                # The data catalog is used outside of a pytask run, so the cache
+                # directory can only come from the project configuration.
+                cache_dir = read_config(config_path).get("cache_dir")
+            self._session_config["cache_dir"] = normalize_cache_dir(
+                cache_dir, root_path
+            )
+            self.path = self._session_config["cache_dir"] / "data_catalogs" / self.name
 
         self.path.mkdir(parents=True, exist_ok=True)
 
