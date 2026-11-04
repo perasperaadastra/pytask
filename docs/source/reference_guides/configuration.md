@@ -20,6 +20,23 @@ editor_url_scheme = "vscode"
 
 ## The options
 
+### `cache_dir`
+
+pytask keeps its cache in `.pytask` in the project root: the file hash cache, the legacy
+SQLite database, the runtimes used by [`pytask profile`](commands.md#pytask-profile) and
+the data catalogs. Set `cache_dir` to move them somewhere else. Relative paths are
+resolved against the project root.
+
+```toml
+[tool.pytask.ini_options]
+cache_dir = "cache"
+```
+
+The lockfile is not part of the cache and always stays in the project root.
+
+The same option is available on the command line as `--cache-dir` for `build`, `clean`,
+`collect`, `dag` and `profile`.
+
 ### `check_casing_of_paths`
 
 Since pytask encourages platform-independent reproducibility, it will raise a warning if

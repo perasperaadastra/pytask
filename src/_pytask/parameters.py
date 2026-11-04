@@ -13,6 +13,7 @@ from sqlalchemy.engine import make_url
 from sqlalchemy.exc import ArgumentError
 
 from _pytask.click import get_command
+from _pytask.config_utils import CACHE_DIR_DEFAULT
 from _pytask.config_utils import set_defaults_from_config
 from _pytask.path import import_path
 from _pytask.pluginmanager import hookimpl
@@ -84,6 +85,21 @@ _EDITOR_URL_SCHEME_OPTION = click.Option(
     ),
 )
 """click.Option: An option to embed URLs in task ids."""
+
+_CACHE_DIR_OPTION = click.Option(
+    ["--cache-dir"],
+    type=click.Path(
+        file_okay=False,
+        dir_okay=True,
+        readable=True,
+        allow_dash=True,
+        path_type=Path,
+        resolve_path=False,
+    ),
+    help="Path to cache dir.",
+    default=CACHE_DIR_DEFAULT,
+)
+"""click.Option: An option to change cache directory."""
 
 
 def _database_url_callback(
@@ -184,7 +200,7 @@ _HOOK_MODULE_OPTION = click.Option(
 def pytask_extend_command_line_interface(cli: click.Group) -> None:
     """Register general markers."""
     for command in ("build", "clean", "collect", "dag", "profile"):
-        cli.commands[command].params.extend((_DATABASE_URL_OPTION,))
+        cli.commands[command].params.extend((_CACHE_DIR_OPTION, _DATABASE_URL_OPTION))
     for command in (
         "build",
         "clean",

@@ -55,7 +55,7 @@ def pytask_extend_command_line_interface(cli: click.Group) -> None:
 @hookimpl
 def pytask_post_parse(config: dict[str, Any]) -> None:
     """Register the export option."""
-    runtime_state = RuntimeState.from_root(config["root"])
+    runtime_state = RuntimeState.from_cache_dir(config["cache_dir"])
     config["pm"].register(ProfilePlugin(runtime_state))
     config["pm"].register(DurationNameSpace(runtime_state))
     config["pm"].register(ExportNameSpace)

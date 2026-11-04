@@ -18,7 +18,7 @@ def pytask_parse_config(config: dict[str, Any]) -> None:
     # Set default.
     if not database_url:
         config["database_url"] = make_url(
-            f"sqlite:///{config['root'].joinpath('.pytask').as_posix()}/pytask.sqlite3"
+            f"sqlite:///{config['cache_dir'].as_posix()}/pytask.sqlite3"
         )
     elif isinstance(database_url, str):
         config["database_url"] = make_url(database_url)
