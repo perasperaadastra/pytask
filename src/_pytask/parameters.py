@@ -92,7 +92,6 @@ _CACHE_DIR_OPTION = click.Option(
         file_okay=False,
         dir_okay=True,
         readable=True,
-        allow_dash=True,
         path_type=Path,
         resolve_path=False,
     ),
